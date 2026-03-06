@@ -703,12 +703,12 @@ function createTouchButtons(){
 
   const defs=[
     // Left cluster: left, right, thrust
-    {id:'left', t:'◀', k:'left',  x:safeB,            y:by},
-    {id:'right',t:'▶', k:'right', x:safeB+s*1.55,     y:by},
-    {id:'up',   t:'▲', k:'up',    x:safeB+s*0.775,    y:by-s*1.45},
+    {id:'left', t:'◀', k:'left',  x:mb,            y:by},
+    {id:'right',t:'▶', k:'right', x:mb+s*1.55,     y:by},
+    {id:'up',   t:'▲', k:'up',    x:mb+s*0.775,    y:by-s*1.45},
     // Right cluster: fire, hyperspace
-    {id:'fire', t:'●', k:'fire',  x:W-safeB-s,        y:by},
-    {id:'hyper',t:'HYP',k:'hyper',x:W-safeB-s*2.4,   y:by,fs:13},
+    {id:'fire', t:'●', k:'fire',  x:W-mb-s,        y:by},
+    {id:'hyper',t:'HYP',k:'hyper',x:W-mb-s*2.4,   y:by,fs:13},
   ];
 
   defs.forEach(d=>{
