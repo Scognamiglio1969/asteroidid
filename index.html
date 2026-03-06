@@ -8,9 +8,12 @@
 <meta name="apple-mobile-web-app-title" content="ASTEROIDS">
 <title>ASTEROIDS</title>
 <style>
+:root{--sab:0px;}
+@supports(padding:env(safe-area-inset-bottom)){:root{--sab:env(safe-area-inset-bottom);}}
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;}
-canvas{display:block;position:fixed;top:0;left:0;}
+html{height:-webkit-fill-available;}
+html,body{width:100%;height:100%;min-height:-webkit-fill-available;background:#000;overflow:hidden;-webkit-user-select:none;user-select:none;}
+canvas{display:block;position:fixed;top:0;left:0;touch-action:none;}
 #scanlines{
   position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;
   background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
@@ -40,13 +43,16 @@ canvas{display:block;position:fixed;top:0;left:0;}
 // ─── CANVAS ────────────────────────────────────────────────
 const canvas = document.getElementById('c');
 const ctx    = canvas.getContext('2d');
+function getH(){return window.visualViewport?window.visualViewport.height:window.innerHeight;}
 let W = canvas.width  = window.innerWidth;
-let H = canvas.height = window.innerHeight;
-window.addEventListener('resize',()=>{
+let H = canvas.height = getH();
+function onResize(){
   W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+  H = canvas.height = getH();
   makeStars(); rebuildButtons();
-});
+}
+window.addEventListener('resize', onResize);
+if(window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 
 // ─── AUDIO ────────────────────────────────────────────────
 let AC=null;
@@ -146,7 +152,7 @@ let pulseTick,pulseFlip;
 let bannerTxt,bannerT;
 let blinkOn=true;
 let lastTs=0;
-hi=parseInt(localStorage.getItem('ast_hi')||'0');
+try{hi=parseInt(localStorage.getItem('ast_hi')||'0');}catch(e){hi=0;}
 
 // ─── STARS ────────────────────────────────────────────────
 let stars=[];
@@ -205,7 +211,7 @@ function wrapY(o){
 
 function addScore(pts,x,y){
   score+=pts;
-  if(score>hi){hi=score;localStorage.setItem('ast_hi',hi);}
+  if(score>hi){hi=score;try{localStorage.setItem('ast_hi',hi);}catch(e){}}
   if(score>=nextXL){lives++;nextXL+=XL_PTS;SFX.extraL();}
   if(x!=null)floatScore(x,y,pts);
 }
@@ -428,7 +434,7 @@ function update(dt){
   }
 
   // ── Level clear ──
-  if(asteroids.length===0&&!ship?.dead&&!levelClr){
+  if(asteroids.length===0&&!(ship&&ship.dead)&&!levelClr){
     levelClr=true;
     setTimeout(()=>{levelClr=false;if(state==='PLAY')nextLevel();},1600);
   }
@@ -688,11 +694,12 @@ function rebuildButtons(){document.querySelectorAll('.tb').forEach(el=>el.remove
 
 function createTouchButtons(){
   const s=Math.min(W*0.155,75);
-  const mb=Math.max(25,window.innerHeight*0.025);
-  const safeB=mb+(typeof CSS!=='undefined'&&CSS.supports('padding-bottom','env(safe-area-inset-bottom)')?0:0);
+  // Safe area inset for iPhone notch/home indicator
+  const safeInset=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab')||'0')||0;
+  const mb=Math.max(30, safeInset + 15);
 
   // Bottom Y for bottom row
-  const by=H-safeB-s;
+  const by=H-mb-s;
 
   const defs=[
     // Left cluster: left, right, thrust
